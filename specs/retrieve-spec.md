@@ -36,7 +36,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 
 ## Design Decisions
 
-*Complete the fields below before writing any code. Use your AI tool in Plan or Ask mode to help you reason through what belongs here — but the decisions are yours.*
+*Complete the fields below before writing any code. Use your AI tool in Plan or Ask mode to help you reason through what
 
 ---
 
@@ -45,7 +45,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Describe how you will use `_collection.query()` to find relevant chunks. What arguments will you pass, and why?*
 
 ```
-[your answer here]
+I will call _collection.query() once with the user query, ask for documents, metadatas, and distances, and use the configured result count from config.py.
 ```
 
 ---
@@ -55,7 +55,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Sketch out what one item in your return list looks like as a concrete example. Where does each field come from in the query results?*
 
 ```
-[your answer here]
+Returns a one dict per hit with only text, game, and distance.
 ```
 
 ---
@@ -65,7 +65,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *`_collection.query()` returns nested lists. Describe what index you need to access to get the actual list of results for a single query, and why the nesting exists.*
 
 ```
-[your answer here]
+ChromaDB returns one list per input query, so for a single user question I take index 0 from each returned field.
 ```
 
 ---
@@ -75,7 +75,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+I am not planning on doing hard-filter by distance yet; return the top n results and let generation decide how much context to trust.
 ```
 
 ---
@@ -85,7 +85,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *How does your implementation behave when: (a) the collection is empty, (b) the query matches no chunks well, (c) the query matches chunks from multiple games?*
 
 ```
-[your answer here]
+if the collection is empty, return []; if the query is weak, still return whatever ChromaDB finds; if multiple games match, keep them all in ranked order.
 ```
 
 ---
@@ -97,10 +97,10 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 **Test query and top result returned:**
 
 ```
-Query: [your test query]
-Top result game: [game name]
-Distance score: [score]
-Does it make sense? [yes / no / explain]
+Query: What happens if you roll a 7 in Catan?
+Top result game: Catan
+Distance score: 0.471
+Does it make sense? Yes, since the query is semantically similar to "x, that hex produces no resources that turn, regardless of the number rolled." which are both about rolling a number.
 ```
 
 **One thing about the query results that surprised you:**

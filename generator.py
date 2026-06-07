@@ -29,11 +29,46 @@ def generate_response(query, retrieved_chunks):
 
     Return the response as a plain string.
     """
+
+    prompt = "You are a board-game rules assistant. Answer only using the provided CONTEXT blocks and do not use outside knowledge. If the answer cannot be fully determined from the context, say you do not know. When you provide a factual statement, immediately follow it with a short citation in square brackets naming the source game, e.g. [Source: Catan]. If the answer uses multiple chunks from different games, list all cited games in a comma-separated bracket, e.g. [Sources: Catan, Monopoly]."
+
     if not retrieved_chunks:
         return (
             "I couldn't find anything relevant in the loaded rule books. "
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
+    
+    filter_chunck = [chunk for chunk in retrieved_chunks if chunk["distance"] <= 0.50]
+
+    if not filter_chunck:
+      return (
+          "I couldn't find anything relevant in the loaded rule books. "
+          "Try rephrasing your question — or check that your ingestion pipeline is working."
+      )
+    
+    context = []
+
+    for chunck in filter_chunck:
+       context.append(f"[Game: {chunck['game']}] (dist: {chunck['distance']:.3f})\n{chunck['text']}")
+
+    context_text = "\n---\n".join(context)
+
+
+    messages = [
+       {
+          "role":"system",
+          "content":prompt,
+       },
+       {
+          "role": "user",
+          "content": f"Question: {query}\n\nCONTEXT:\n{context_text}\n\nAnswer the question using only the CONTEXT above.",
+       }
+    ]
+
+    response = _client.chat.completions.create(
+      model=LLM_MODEL,
+      messages=messages,
+    )
 
     # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    return response.choices[0].message.content.strip()

@@ -67,6 +67,21 @@ def retrieve(query, n_results=N_RESULTS):
     """
     if _collection.count() == 0:
         return []
+    results = _collection.query(
+        query_texts=query,
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"])
+
+    if len(results) == 0:
+        return []
+
+    chuncks = []
+    for game, text, distance in zip(results["metadatas"][0], results["documents"][0], results["distances"][0]):
+        chunck = {}
+        chunck['game'] = game
+        chunck['text'] = text
+        chunck['distance'] = distance
+        chuncks.append(chunck)
 
     # Your implementation here.
-    return []
+    return chuncks
